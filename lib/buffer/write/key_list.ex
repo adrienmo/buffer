@@ -1,4 +1,4 @@
-defmodule Buffer.Write.Simple do
+defmodule Buffer.Write.KeyList do
   use GenServer
 
   @default_interval 1000
@@ -23,7 +23,7 @@ defmodule Buffer.Write.Simple do
         worker(unquote(__MODULE__), [buffer], id: __MODULE__)
       end
 
-      def add(element), do: unquote(__MODULE__).add(__MODULE__, element)
+      def add(key, element), do: unquote(__MODULE__).add(__MODULE__, key, element)
 
       def sync(), do: unquote(__MODULE__).sync(__MODULE__)
     end
@@ -43,8 +43,8 @@ defmodule Buffer.Write.Simple do
     {:ok, state}
   end
 
-  def add(name, element) do
-    :ets.insert(name, element)
+  def add(name, key, element) do
+    :ets.insert(name, {key, element})
   end
 
   def handle_call(:sync, _, state) do
@@ -67,6 +67,7 @@ defmodule Buffer.Write.Simple do
   defp get_element(name, key, acc) do
     next_key = :ets.next(name, key)
     element = :ets.take(name, key)
-    get_element(name, next_key, [element| acc])
+    key_list = {key, Enum.map(&(elem(&1, 1)))}
+    get_element(name, next_key, [key_list| acc])
   end
 end
