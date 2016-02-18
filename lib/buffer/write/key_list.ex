@@ -60,14 +60,14 @@ defmodule Buffer.Write.KeyList do
     {:noreply, state}
   end
 
-  defp write(state), do: state.name |> get_element() |> state.write.()
+  defp write(state), do: state.name |> get_elements() |> state.write.()
 
-  defp get_element(name), do: get_element(name, :ets.first(name), [])
-  defp get_element(_, :"$end_of_table", acc), do: acc
-  defp get_element(name, key, acc) do
+  defp get_elements(name), do: get_elements(name, :ets.first(name), [])
+  defp get_elements(_, :"$end_of_table", acc), do: acc
+  defp get_elements(name, key, acc) do
     next_key = :ets.next(name, key)
     element = :ets.take(name, key)
-    key_list = {key, Enum.map(&(elem(&1, 1)))}
-    get_element(name, next_key, [key_list| acc])
+    key_list = {key, Enum.map(element, &(elem(&1, 1)))}
+    get_elements(name, next_key, [key_list| acc])
   end
 end
