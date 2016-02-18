@@ -1,4 +1,4 @@
-defmodule Buffer.Read do
+defmodule Buffer.Write.Count do
   use GenServer
 
   @default_interval 1000
@@ -11,19 +11,20 @@ defmodule Buffer.Read do
 
   defmacro buffer(opts) do
     interval = :proplists.get_value(:interval, opts, @default_interval)
-    read = :proplists.get_value(:read, opts)
+    write = :proplists.get_value(:write, opts)
     quote do
       def worker do
         import Supervisor.Spec
         buffer = %{
           name: __MODULE__,
           interval: unquote(interval),
-          read: unquote(read)
+          write: unquote(write)
         }
         worker(unquote(__MODULE__), [buffer], id: __MODULE__)
       end
 
-      def read(key), do: unquote(__MODULE__).read(__MODULE__, key)
+      def incr(key), do: unquote(__MODULE__).incr(__MODULE__, key, 1)
+      def incr(key, value), do: unquote(__MODULE__).incr(__MODULE__, key, value)
 
       def sync(), do: unquote(__MODULE__).sync(__MODULE__)
     end
@@ -38,20 +39,17 @@ defmodule Buffer.Read do
   end
 
   def init(state) do
-    :ets.new(state.name, [:public, :set, :named_table, {:read_concurrency, true}])
-    Process.send_after(self(), :sync, 0)
+    :ets.new(state.name, [:public, :set, :named_table, {:write_concurrency, true}])
+    Process.send_after(self(), :sync, state.interval)
     {:ok, state}
   end
 
-  def read(name, key) do
-    case :ets.lookup(name, key) do
-      [{_, value}] -> value
-      _ -> nil
-    end
+  def incr(name, key, value) do
+    :ets.update_counter(name, key, value, {key, 0})
   end
 
   def handle_call(:sync, _, state) do
-    read(state)
+    write(state)
     {:reply, :ok, state}
   end
 
@@ -59,9 +57,17 @@ defmodule Buffer.Read do
     unless is_nil(state.interval) do
       Process.send_after(self(), :sync, state.interval)
     end
-    read(state)
+    write(state)
     {:noreply, state}
   end
 
-  defp read(state), do: :ets.insert(state.name, state.read.())
+  defp write(state), do: state.name |> get_counters() |> state.write.()
+
+  defp get_counters(name), do: get_counters(name, :ets.first(name), [])
+  defp get_counters(_, :"$end_of_table", acc), do: acc
+  defp get_counters(name, key, acc) do
+    next_key = :ets.next(name, key)
+    element = :ets.take(name, key) |> hd()
+    get_counters(name, next_key, [element| acc])
+  end
 end
