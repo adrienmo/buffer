@@ -40,7 +40,9 @@ defmodule Buffer.Write.Count do
 
   def init(state) do
     :ets.new(state.name, [:public, :set, :named_table, {:write_concurrency, true}])
-    Process.send_after(self(), :sync, state.interval)
+    unless is_nil(state.interval) do
+      Process.send_after(self(), :sync, state.interval)
+    end
     {:ok, state}
   end
 
@@ -54,9 +56,7 @@ defmodule Buffer.Write.Count do
   end
 
   def handle_info(:sync, state) do
-    unless is_nil(state.interval) do
-      Process.send_after(self(), :sync, state.interval)
-    end
+    Process.send_after(self(), :sync, state.interval)
     write(state)
     {:noreply, state}
   end
