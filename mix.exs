@@ -26,6 +26,7 @@ defmodule Buffer.Mixfile do
 
   defp package do
     [
+      files: ~w(include lib README.md LICENSE VERSION, mix.exs),
       maintainers: ["Adrien Moreau"],
       licenses: ["MIT"],
       links: %{github: "https://github.com/adrienmo/buffer"}
