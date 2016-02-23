@@ -1,8 +1,6 @@
 defmodule Buffer.Write.Count do
   use GenServer
 
-  @default_interval 1000
-
   defmacro __using__(_) do
     quote do
       import unquote(__MODULE__), only: :macros
@@ -10,17 +8,15 @@ defmodule Buffer.Write.Count do
   end
 
   defmacro buffer(opts) do
-    interval = :proplists.get_value(:interval, opts, @default_interval)
-    write = :proplists.get_value(:write, opts)
     quote do
       def worker do
         import Supervisor.Spec
-        buffer = %{
+        state = %{
           name: __MODULE__,
-          interval: unquote(interval),
-          write: unquote(write)
+          interval: unquote(opts[:interval]),
+          write: unquote(opts[:write])
         }
-        worker(unquote(__MODULE__), [buffer], id: __MODULE__)
+        worker(unquote(__MODULE__), [state], id: __MODULE__)
       end
 
       def incr(key), do: unquote(__MODULE__).incr(__MODULE__, key, 1)

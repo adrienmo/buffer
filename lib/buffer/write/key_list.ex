@@ -1,8 +1,6 @@
 defmodule Buffer.Write.KeyList do
   use GenServer
 
-  @default_interval 1000
-
   defmacro __using__(_) do
     quote do
       import unquote(__MODULE__), only: :macros
@@ -10,22 +8,19 @@ defmodule Buffer.Write.KeyList do
   end
 
   defmacro buffer(opts) do
-    interval = :proplists.get_value(:interval, opts, @default_interval)
-    write = :proplists.get_value(:write, opts)
-    limit = :proplists.get_value(:limit, opts, nil)
     quote do
       def worker do
         import Supervisor.Spec
-        buffer = %{
+        state = %{
           name: __MODULE__,
-          interval: unquote(interval),
-          write: unquote(write),
-          limit: unquote(limit)
+          interval: unquote(opts[:interval]),
+          write: unquote(opts[:write]),
+          limit: unquote(opts[:limit])
         }
-        worker(unquote(__MODULE__), [buffer], id: __MODULE__)
+        worker(unquote(__MODULE__), [state], id: __MODULE__)
       end
 
-      def add(key, element), do: unquote(__MODULE__).add(__MODULE__, key, element, unquote(limit))
+      def add(key, element), do: unquote(__MODULE__).add(__MODULE__, key, element, unquote(opts[:limit]))
 
       def dump_table(), do: unquote(__MODULE__).dump_table(__MODULE__)
       def reset(), do: unquote(__MODULE__).reset(__MODULE__)

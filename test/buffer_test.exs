@@ -49,9 +49,61 @@ defmodule BufferTest do
     assert([{_, [key2: 5050, key1: 100]}] = result)
   end
 
-  test "0100# Read, Read" do
+  test "0100# Read, Get" do
     BufferRead.sync()
-    assert(BufferRead.read(:key1) == "value1")
+    assert(BufferRead.get(:key1) == "value1")
+  end
+
+  test "0101# Read, Select" do
+    BufferRead.sync()
+    match_spec1 = get_match_spec("fn(x = {_, %{field1: 5}}) -> x end")
+    match_spec2 = get_match_spec("fn(x = {_, %{field2: 4}}) -> x end")
+
+    field1_5 = BufferRead.select(match_spec1)
+    field2_4 = BufferRead.select(match_spec2)
+
+    assert(field1_5[:key3] != nil)
+    assert(field2_4[:key3] != nil)
+    assert(field2_4[:key4] != nil)
+  end
+
+  test "0102# Read, Update" do
+    BufferKeyListResult.add(:key1, :value1)
+    BufferKeyListResult.add(:key2, :value2)
+
+    BufferReadUpdate.sync()
+    BufferKeyListResult.reset()
+
+    BufferKeyListResult.add(:key1, :value2)
+    BufferKeyListResult.add(:key2, :value2)
+
+    BufferReadUpdate.sync()
+    result = BufferKeyListResult.dump_table()
+    assert(result[BufferReadUpdate] == [:key1])
+  end
+
+  test "0103# Read, Delete" do
+    BufferKeyListResult.add(:key1, :value1)
+    BufferKeyListResult.add(:key2, :value2)
+
+    BufferReadDefaultBehavior.sync()
+    BufferReadDeleteBehavior.sync()
+
+    BufferKeyListResult.reset()
+    BufferKeyListResult.add(:key3, :value3)
+
+    BufferReadDefaultBehavior.sync()
+    BufferReadDeleteBehavior.sync()
+
+    assert(length(BufferReadDefaultBehavior.dump_table()) == 3)
+    assert(length(BufferReadDeleteBehavior.dump_table()) == 1)
+  end
+
+  defp get_match_spec(fun_string) do
+    fun_string
+    |> Code.eval_string()
+    |> elem(0)
+    |> :ets.fun2ms()
   end
 end
 
@@ -67,7 +119,10 @@ defmodule TestSupervisor do
       BufferKeyListLimit.worker,
       BufferKeyListInterval.worker,
       BufferCount.worker,
-      BufferRead.worker
+      BufferRead.worker,
+      BufferReadUpdate.worker,
+      BufferReadDefaultBehavior.worker,
+      BufferReadDeleteBehavior.worker
     ]
     supervise(children, strategy: :one_for_one, max_restarts: 1, max_seconds: 1)
   end
@@ -105,8 +160,41 @@ end
 
 defmodule BufferRead do
   use Buffer.Read
-  buffer interval: 1000, read: &read/0
+  buffer read: &read/0
   def read() do
-    [{:key1, "value1"}, {:key2, "value2"}]
+    [
+      {:key1, "value1"},
+      {:key2, "value2"},
+      {:key3, %{field1: 5, field2: 4}},
+      {:key4, %{field1: 4, field2: 4}}
+    ]
+  end
+end
+
+defmodule BufferReadUpdate do
+  use Buffer.Read
+  buffer read: &read/0, on_element_updated: &update/1
+  def read() do
+    BufferKeyListResult.dump_table()
+  end
+
+  def update(x) do
+    BufferKeyListResult.add(__MODULE__, x)
+  end
+end
+
+defmodule BufferReadDefaultBehavior do
+  use Buffer.Read
+  buffer read: &read/0
+  def read() do
+    BufferKeyListResult.dump_table()
+  end
+end
+
+defmodule BufferReadDeleteBehavior do
+  use Buffer.Read
+  buffer read: &read/0, behavior: :delete
+  def read() do
+    BufferKeyListResult.dump_table()
   end
 end
