@@ -1,9 +1,13 @@
 # buffer
-Provide read and write buffers for Elixir
-
 [![Travis](https://img.shields.io/travis/adrienmo/buffer.svg?branch=master&style=flat-square)](https://travis-ci.org/adrienmo/buffer)
 [![Coveralls](https://img.shields.io/coveralls/adrienmo/buffer.svg?branch=master&style=flat-square)](https://coveralls.io/github/adrienmo/buffer)
 [![Hex.pm](https://img.shields.io/hexpm/v/buffer.svg?style=flat-square)](https://hex.pm/packages/buffer)
+
+Provide read and write buffers for Elixir.
+Use-case examples:
+- Read buffer for a RDBMS.
+- Write buffer for statsd counters.
+- Write buffer to do batch API calls.
 
 ## Description
 
