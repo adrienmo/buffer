@@ -1,20 +1,17 @@
 defmodule Buffer.Write.KeyList do
   use GenServer
+  use Behaviour
 
-  defmacro __using__(_) do
+  defmacro __using__(opts \\ []) do
     quote do
-      import unquote(__MODULE__), only: :macros
-    end
-  end
+      @behaviour unquote(__MODULE__)
 
-  defmacro buffer(opts) do
-    quote do
       def worker do
         import Supervisor.Spec
         state = %{
           name: __MODULE__,
           interval: unquote(opts[:interval]),
-          write: unquote(opts[:write]),
+          write: &write/1,
           limit: unquote(opts[:limit])
         }
         worker(unquote(__MODULE__), [state], id: __MODULE__)
@@ -28,6 +25,9 @@ defmodule Buffer.Write.KeyList do
       def sync(), do: unquote(__MODULE__).sync(__MODULE__)
     end
   end
+
+  @doc "Write function"
+  defcallback write([{key :: any(), element :: any()}]) :: any()
 
   def start_link(state) do
     GenServer.start_link(__MODULE__, state, [name: state.name])

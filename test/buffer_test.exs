@@ -130,21 +130,18 @@ end
 
 defmodule BufferKeyListResult do
   use Buffer.Write.KeyList
-  buffer interval: nil, limit: nil, write: &write/1
   def write(_), do: nil
 end
 
 defmodule BufferKeyListLimit do
-  use Buffer.Write.KeyList
-  buffer interval: nil, limit: 10, write: &write/1
+  use Buffer.Write.KeyList, limit: 10
   def write(keylists) do
     BufferKeyListResult.add(__MODULE__, keylists)
   end
 end
 
 defmodule BufferKeyListInterval do
-  use Buffer.Write.KeyList
-  buffer interval: 1000, limit: nil, write: &write/1
+  use Buffer.Write.KeyList, interval: 1000, limit: nil
   def write(keylists) do
     BufferKeyListResult.add(__MODULE__, keylists)
   end
@@ -152,7 +149,6 @@ end
 
 defmodule BufferCount do
   use Buffer.Write.Count
-  buffer interval: nil, write: &write/1
   def write(counters) do
     BufferKeyListResult.add(__MODULE__, counters)
   end
@@ -160,7 +156,6 @@ end
 
 defmodule BufferRead do
   use Buffer.Read
-  buffer read: &read/0
   def read() do
     [
       {:key1, "value1"},
@@ -172,8 +167,7 @@ defmodule BufferRead do
 end
 
 defmodule BufferReadUpdate do
-  use Buffer.Read
-  buffer read: &read/0, on_element_updated: &update/1
+  use Buffer.Read, on_element_updated: &update/1
   def read() do
     BufferKeyListResult.dump_table()
   end
@@ -185,15 +179,13 @@ end
 
 defmodule BufferReadDefaultBehavior do
   use Buffer.Read
-  buffer read: &read/0
   def read() do
     BufferKeyListResult.dump_table()
   end
 end
 
 defmodule BufferReadDeleteBehavior do
-  use Buffer.Read
-  buffer read: &read/0, behavior: :delete
+  use Buffer.Read, behavior: :delete
   def read() do
     BufferKeyListResult.dump_table()
   end

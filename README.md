@@ -20,8 +20,7 @@ buffer is a library to create read or write buffer easily.
 ```elixir
 ## Declaration of the buffer
 defmodule BufferKeyListLimit do
-  use Buffer.Write.KeyList
-  buffer interval: 1000, limit: 10, write: &write/1
+  use Buffer.Write.KeyList, interval: 1000, limit: 10
   def write(keylists) do
     ## Write here your flushing function
   end
@@ -45,8 +44,7 @@ BufferKeyListLimit.sync(:key1)
 ```elixir
 ## Declaration of the buffer
 defmodule BufferCount do
-  use Buffer.Write.Count
-  buffer interval: 1000, write: &write/1
+  use Buffer.Write.Count, interval: 1000
   def write(counters) do
     ## Write here your flushing function
   end
@@ -70,8 +68,7 @@ BufferCount.sync()
 ```elixir
 ## Declaration of the buffer
 defmodule BufferRead do
-  use Buffer.Read
-  buffer interval: 1000, read: &read/0
+  use Buffer.Read, interval: 1000
   def read() do
     ## Write here your reading function
     [{:key1, "value1"}, {:key2, "value2"}]

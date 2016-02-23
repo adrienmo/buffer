@@ -1,20 +1,17 @@
 defmodule Buffer.Read do
   use GenServer
+  use Behaviour
 
-  defmacro __using__(_) do
+  defmacro __using__(opts \\ []) do
     quote do
-      import unquote(__MODULE__), only: :macros
-    end
-  end
+      @behaviour unquote(__MODULE__)
 
-  defmacro buffer(opts) do
-    quote do
       def worker do
         import Supervisor.Spec
         state = %{
           name: __MODULE__,
           interval: unquote(opts[:interval]),
-          read: unquote(opts[:read]),
+          read: &read/0,
           on_element_updated: unquote(opts[:on_element_updated]),
           behavior: unquote(opts[:behavior])
         }
@@ -27,6 +24,9 @@ defmodule Buffer.Read do
       def dump_table(), do: unquote(__MODULE__).dump_table(__MODULE__)
     end
   end
+
+  @doc "Read function"
+  defcallback read() :: [{key :: any(), element :: any()}]
 
   def start_link(state) do
     GenServer.start_link(__MODULE__, state, [name: state.name])
