@@ -2,17 +2,20 @@ defmodule Buffer.Read do
   use GenServer
   use Behaviour
 
+  @update_fun :on_element_updated
+
   defmacro __using__(opts \\ []) do
     quote do
       @behaviour unquote(__MODULE__)
 
       def worker do
         import Supervisor.Spec
+
         state = %{
           name: __MODULE__,
           interval: unquote(opts[:interval]),
           read: &read/0,
-          on_element_updated: unquote(opts[:on_element_updated]),
+          update: function_exported?(__MODULE__, unquote(@update_fun), 1),
           behavior: unquote(opts[:behavior])
         }
         worker(unquote(__MODULE__), [state], id: __MODULE__)
@@ -82,7 +85,7 @@ defmodule Buffer.Read do
       for id <- (old_ids -- new_ids), do: delete(state.name, id)
     end
 
-    if state.on_element_updated != nil do
+    if state.update do
       updated_ids = Enum.reduce(elements, [], fn({id, element}, acc) ->
         if element != get(state.name, id) do
           [id | acc]
@@ -91,7 +94,9 @@ defmodule Buffer.Read do
         end
       end)
 
-      unless updated_ids == [], do: state.on_element_updated.(updated_ids)
+      unless updated_ids == [] do
+        apply(state.name, @update_fun, [updated_ids])
+      end
     end
 
     :ets.insert(state.name, elements)

@@ -167,12 +167,12 @@ defmodule BufferRead do
 end
 
 defmodule BufferReadUpdate do
-  use Buffer.Read, on_element_updated: &update/1
+  use Buffer.Read
   def read() do
     BufferKeyListResult.dump_table()
   end
 
-  def update(x) do
+  def on_element_updated(x) do
     BufferKeyListResult.add(__MODULE__, x)
   end
 end
