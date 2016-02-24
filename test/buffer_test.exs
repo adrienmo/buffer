@@ -2,6 +2,14 @@ defmodule BufferTest do
   use ExUnit.Case
 
   setup_all do
+    Buffer.Supervisor.start_child(BufferKeyListResult)
+    Buffer.Supervisor.start_child(BufferKeyListLimit)
+    Buffer.Supervisor.start_child(BufferKeyListInterval)
+    Buffer.Supervisor.start_child(BufferCount)
+    Buffer.Supervisor.start_child(BufferRead)
+    Buffer.Supervisor.start_child(BufferReadUpdate)
+    Buffer.Supervisor.start_child(BufferReadDefaultBehavior)
+    Buffer.Supervisor.start_child(BufferReadDeleteBehavior)
     :ok
   end
 
