@@ -15,6 +15,25 @@ buffer is a library to create read or write buffer easily.
 
 ## Usage
 
+### Add buffer to your project
+
+Update your applications list to include the buffer project:
+
+```elixir
+def application do
+  [applications: [:buffer]]
+end
+```
+
+Add the buffers to the supervisor when your application starts
+
+```elixir
+def start(_type, _args) do
+  Buffer.Supervisor.start_child(BufferKeyListLimit)
+  MyApplication.Supervisor.start_link()
+end
+```
+
 ### Write Buffer for KeyList
 
 ```elixir
