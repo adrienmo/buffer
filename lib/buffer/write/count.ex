@@ -18,8 +18,9 @@ defmodule Buffer.Write.Count do
 
       def incr(key), do: unquote(__MODULE__).incr(__MODULE__, key, 1)
       def incr(key, value), do: unquote(__MODULE__).incr(__MODULE__, key, value)
-
       def sync(), do: unquote(__MODULE__).sync(__MODULE__)
+      def dump_table(), do: unquote(__MODULE__).dump_table(__MODULE__)
+      def reset(), do: unquote(__MODULE__).reset(__MODULE__)
     end
   end
 
@@ -56,6 +57,9 @@ defmodule Buffer.Write.Count do
     write(state)
     {:noreply, state}
   end
+
+  def dump_table(name), do: :ets.tab2list(name)
+  def reset(name), do: :ets.delete_all_objects(name)
 
   defp write(state), do: state.name |> get_counters() |> state.write.()
 

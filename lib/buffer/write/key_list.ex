@@ -18,10 +18,8 @@ defmodule Buffer.Write.KeyList do
       end
 
       def add(key, element), do: unquote(__MODULE__).add(__MODULE__, key, element, unquote(opts[:limit]))
-
       def dump_table(), do: unquote(__MODULE__).dump_table(__MODULE__)
       def reset(), do: unquote(__MODULE__).reset(__MODULE__)
-
       def sync(), do: unquote(__MODULE__).sync(__MODULE__)
     end
   end
