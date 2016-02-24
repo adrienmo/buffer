@@ -22,7 +22,7 @@ defmodule Buffer.Mixfile do
   end
 
   def application do
-    [applications: []]
+    [applications: [], mod: {Buffer, []}]
   end
 
   defp package do

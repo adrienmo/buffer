@@ -2,7 +2,6 @@ defmodule BufferTest do
   use ExUnit.Case
 
   setup_all do
-    TestSupervisor.start_link()
     :ok
   end
 
@@ -104,27 +103,6 @@ defmodule BufferTest do
     |> Code.eval_string()
     |> elem(0)
     |> :ets.fun2ms()
-  end
-end
-
-defmodule TestSupervisor do
-  use Supervisor
-  def start_link do
-    Supervisor.start_link(TestSupervisor, [])
-  end
-
-  def init([]) do
-    children = [
-      BufferKeyListResult.worker,
-      BufferKeyListLimit.worker,
-      BufferKeyListInterval.worker,
-      BufferCount.worker,
-      BufferRead.worker,
-      BufferReadUpdate.worker,
-      BufferReadDefaultBehavior.worker,
-      BufferReadDeleteBehavior.worker
-    ]
-    supervise(children, strategy: :one_for_one, max_restarts: 1, max_seconds: 1)
   end
 end
 

@@ -7,6 +7,7 @@ defmodule Buffer.Read do
   defmacro __using__(opts \\ []) do
     quote do
       @behaviour unquote(__MODULE__)
+      Buffer.Supervisor.add_child(__MODULE__) 
 
       def worker do
         import Supervisor.Spec
