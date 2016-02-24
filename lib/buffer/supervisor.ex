@@ -1,9 +1,6 @@
 defmodule Buffer.Supervisor do
   use Supervisor
 
-  # Wait for the module to be available. (Maybe found a better way to do this)
-  @refresh_delay 10
-
   def start_link do
     Supervisor.start_link(__MODULE__, [], [name: __MODULE__])
   end
@@ -17,12 +14,7 @@ defmodule Buffer.Supervisor do
   end
 
   def start_child(name) do
-    if function_exported?(name, :worker, 0) do
-      child_spec = apply(name, :worker, [])
-      Supervisor.start_child(__MODULE__, child_spec)
-    else
-      :timer.sleep(@refresh_delay)
-      start_child(name)
-    end
+    child_spec = apply(name, :worker, [])
+    Supervisor.start_child(__MODULE__, child_spec)
   end
 end

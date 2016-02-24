@@ -5,7 +5,12 @@ defmodule Buffer.Write.KeyList do
   defmacro __using__(opts \\ []) do
     quote do
       @behaviour unquote(__MODULE__)
-      Buffer.Supervisor.add_child(__MODULE__)
+      @on_load :on_load
+
+      def on_load do
+        Buffer.Supervisor.add_child(__MODULE__)
+        :ok
+      end
 
       def worker do
         import Supervisor.Spec
