@@ -87,20 +87,20 @@ defmodule Buffer.Read do
       for id <- (old_ids -- new_ids), do: delete(state.name, id)
     end
 
-    if state.update do
-      updated_ids = Enum.reduce(elements, [], fn({id, element}, acc) ->
+    updated_ids = if state.update do
+      Enum.reduce(elements, [], fn({id, element}, acc) ->
         if element != get(state.name, id) do
           [id | acc]
         else
           acc
         end
       end)
-
-      unless updated_ids == [] do
-        apply(state.name, @update_fun, [updated_ids])
-      end
     end
 
     :ets.insert(state.name, elements)
+
+    unless updated_ids == [] or updated_ids == nil do
+      apply(state.name, @update_fun, [updated_ids])
+    end
   end
 end
