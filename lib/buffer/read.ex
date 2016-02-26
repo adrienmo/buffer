@@ -23,6 +23,7 @@ defmodule Buffer.Read do
 
       def get(key), do: unquote(__MODULE__).get(__MODULE__, key)
       def select(match_spec), do: unquote(__MODULE__).select(__MODULE__, match_spec)
+      def select(match_spec, limit), do: unquote(__MODULE__).select(__MODULE__, match_spec, limit)
       def sync(), do: unquote(__MODULE__).sync(__MODULE__)
       def dump_table(), do: unquote(__MODULE__).dump_table(__MODULE__)
       def reset(), do: unquote(__MODULE__).reset(__MODULE__)
@@ -56,8 +57,9 @@ defmodule Buffer.Read do
   def dump_table(name), do: :ets.tab2list(name)
   def reset(name), do: :ets.delete_all_objects(name)
 
-  def select(name, match_spec) do
-    :ets.select(name, match_spec)
+  def select(name, match_spec), do: :ets.select(name, match_spec)
+  def select(name, match_spec, limit) do
+    :ets.select(name, match_spec, limit) |> elem(0)
   end
 
   def delete(name, key) do

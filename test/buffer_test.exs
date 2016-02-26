@@ -50,10 +50,11 @@ defmodule BufferTest do
     for _ <- 1..100, do: BufferCount.incr(:key1)
     for x <- 1..100, do: BufferCount.incr(:key2, x)
 
+    assert([key2: 5050, key1: 100] == BufferCount.dump_table())
     BufferCount.sync()
-
     result = BufferKeyListResult.dump_table()
     assert([{_, [key2: 5050, key1: 100]}] = result)
+    BufferCount.reset()
   end
 
   test "0100# Read, Get" do
@@ -68,10 +69,12 @@ defmodule BufferTest do
 
     field1_5 = BufferRead.select(match_spec1)
     field2_4 = BufferRead.select(match_spec2)
+    field2_4_1 = BufferRead.select(match_spec2, 1)
 
     assert(field1_5[:key3] != nil)
     assert(field2_4[:key3] != nil)
     assert(field2_4[:key4] != nil)
+    assert(length(field2_4_1) == 1)
   end
 
   test "0102# Read, Update" do
