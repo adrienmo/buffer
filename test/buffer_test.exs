@@ -10,6 +10,7 @@ defmodule BufferTest do
     Buffer.Supervisor.start_child(BufferReadUpdate)
     Buffer.Supervisor.start_child(BufferReadDefaultBehavior)
     Buffer.Supervisor.start_child(BufferReadDeleteBehavior)
+    Buffer.Supervisor.start_child(BufferSync)
     :ok
   end
 
@@ -109,6 +110,27 @@ defmodule BufferTest do
     assert(length(BufferReadDeleteBehavior.dump_table()) == 1)
   end
 
+  test "0200# Sync" do
+    BufferSync.add(1)
+    BufferSync.add(5)
+    BufferSync.sync
+
+    assert [{1, 2}, {5, 10}] == BufferKeyListResult.dump_table()
+
+    BufferKeyListResult.reset()
+    BufferSync.delete(5)
+    BufferSync.sync
+
+    assert [{1, 2}] == BufferKeyListResult.dump_table()
+
+    BufferKeyListResult.reset()
+    BufferSync.add(2)
+    BufferSync.reset
+    BufferSync.sync
+
+    assert [] == BufferKeyListResult.dump_table()
+  end
+
   defp get_match_spec(fun_string) do
     fun_string
     |> Code.eval_string()
@@ -177,5 +199,16 @@ defmodule BufferReadDeleteBehavior do
   use Buffer.Read, behavior: :delete
   def read() do
     BufferKeyListResult.dump_table()
+  end
+end
+
+defmodule BufferSync do
+  use Buffer.Sync
+  def read(numbers) do
+    for number <- numbers, do: {number, number*2}
+  end
+
+  def write(elements) do
+    for {key, value} <- elements, do: BufferKeyListResult.add(key, value)
   end
 end
