@@ -59,7 +59,7 @@ defmodule Buffer.Read do
 
   def select(name, match_spec), do: :ets.select(name, match_spec)
   def select(name, match_spec, limit) do
-    :ets.select(name, match_spec, limit) |> elem(0)
+    :ets.select(name, match_spec, limit)
   end
 
   def delete(name, key) do

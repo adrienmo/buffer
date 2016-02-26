@@ -69,7 +69,7 @@ defmodule BufferTest do
 
     field1_5 = BufferRead.select(match_spec1)
     field2_4 = BufferRead.select(match_spec2)
-    field2_4_1 = BufferRead.select(match_spec2, 1)
+    {field2_4_1, _} = BufferRead.select(match_spec2, 1)
 
     assert(field1_5[:key3] != nil)
     assert(field2_4[:key3] != nil)
