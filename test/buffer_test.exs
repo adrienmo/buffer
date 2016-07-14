@@ -8,6 +8,7 @@ defmodule BufferTest do
     Buffer.Supervisor.start_child(BufferCount)
     Buffer.Supervisor.start_child(BufferRead)
     Buffer.Supervisor.start_child(BufferReadUpdate)
+    Buffer.Supervisor.start_child(BufferReadUpdateCustom)
     Buffer.Supervisor.start_child(BufferReadDefaultBehavior)
     Buffer.Supervisor.start_child(BufferReadDeleteBehavior)
     Buffer.Supervisor.start_child(BufferSync)
@@ -94,6 +95,9 @@ defmodule BufferTest do
   end
 
   test "0103# Read, Delete" do
+    BufferReadDefaultBehavior.reset()
+    BufferReadDeleteBehavior.reset()
+
     BufferKeyListResult.add(:key1, :value1)
     BufferKeyListResult.add(:key2, :value2)
 
@@ -108,6 +112,21 @@ defmodule BufferTest do
 
     assert(length(BufferReadDefaultBehavior.dump_table()) == 3)
     assert(length(BufferReadDeleteBehavior.dump_table()) == 1)
+  end
+
+  test "0104# Read, Update, Custom Update function" do
+    BufferKeyListResult.add(:key1, %{val: 1, key: 1})
+    BufferKeyListResult.add(:key2, %{val: 2, key: 2})
+
+    BufferReadUpdateCustom.sync()
+    BufferKeyListResult.reset()
+
+    BufferKeyListResult.add(:key1, %{val: 3, key: 1})
+    BufferKeyListResult.add(:key2, %{val: 4, key: 3})
+
+    BufferReadUpdateCustom.sync()
+    result = BufferKeyListResult.dump_table()
+    assert(result[BufferReadUpdateCustom] == [:key2])
   end
 
   test "0200# Sync" do
@@ -146,28 +165,22 @@ end
 
 defmodule BufferKeyListLimit do
   use Buffer.Write.KeyList, limit: 10
-  def write(keylists) do
-    BufferKeyListResult.add(__MODULE__, keylists)
-  end
+  def write(keylists), do: BufferKeyListResult.add(__MODULE__, keylists)
 end
 
 defmodule BufferKeyListInterval do
   use Buffer.Write.KeyList, interval: 1000, limit: nil
-  def write(keylists) do
-    BufferKeyListResult.add(__MODULE__, keylists)
-  end
+  def write(keylists), do: BufferKeyListResult.add(__MODULE__, keylists)
 end
 
 defmodule BufferCount do
   use Buffer.Write.Count
-  def write(counters) do
-    BufferKeyListResult.add(__MODULE__, counters)
-  end
+  def write(counters), do: BufferKeyListResult.add(__MODULE__, counters)
 end
 
 defmodule BufferRead do
   use Buffer.Read
-  def read() do
+  def read do
     [
       {:key1, "value1"},
       {:key2, "value2"},
@@ -179,27 +192,31 @@ end
 
 defmodule BufferReadUpdate do
   use Buffer.Read
-  def read() do
-    BufferKeyListResult.dump_table()
-  end
+  def read, do: BufferKeyListResult.dump_table
+  def on_element_updated(x), do: BufferKeyListResult.add(__MODULE__, x)
+end
 
-  def on_element_updated(x) do
-    BufferKeyListResult.add(__MODULE__, x)
+defmodule BufferReadUpdateCustom do
+  use Buffer.Read
+  def read, do: BufferKeyListResult.dump_table
+  def on_element_updated(x), do: BufferKeyListResult.add(__MODULE__, x)
+  def updated?(el1, el2) do
+    if is_nil(el1) or is_nil(el2) do
+      el1 != el2
+    else
+      el1[:key] != el2[:key]
+    end
   end
 end
 
 defmodule BufferReadDefaultBehavior do
   use Buffer.Read
-  def read() do
-    BufferKeyListResult.dump_table()
-  end
+  def read, do: BufferKeyListResult.dump_table
 end
 
 defmodule BufferReadDeleteBehavior do
   use Buffer.Read, behavior: :delete
-  def read() do
-    BufferKeyListResult.dump_table()
-  end
+  def read, do: BufferKeyListResult.dump_table
 end
 
 defmodule BufferSync do

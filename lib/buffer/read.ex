@@ -3,6 +3,7 @@ defmodule Buffer.Read do
   use Behaviour
 
   @update_fun :on_element_updated
+  @compare_fun :updated?
 
   defmacro __using__(opts \\ []) do
     quote do
@@ -16,6 +17,7 @@ defmodule Buffer.Read do
           interval: unquote(opts[:interval]),
           read: &read/0,
           update: function_exported?(__MODULE__, unquote(@update_fun), 1),
+          compare: function_exported?(__MODULE__, unquote(@compare_fun), 2),
           behavior: unquote(opts[:behavior])
         }
         worker(unquote(__MODULE__), [state], id: __MODULE__)
@@ -91,11 +93,15 @@ defmodule Buffer.Read do
 
     updated_ids = if state.update do
       Enum.reduce(elements, [], fn({id, element}, acc) ->
-        if element != get(state.name, id) do
-          [id | acc]
+        previous_element = get(state.name, id)
+        # Check if the item has been updated using the custom compare function
+        is_updated = if state.compare do
+          apply(state.name, @compare_fun, [previous_element, element])
         else
-          acc
+          # Default behavior if no custom compare function is declared
+          element != previous_element
         end
+        if is_updated, do: [id | acc], else: acc
       end)
     end
 

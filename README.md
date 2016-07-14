@@ -92,10 +92,21 @@ defmodule BufferRead do
     ## Write here your reading function
     [{:key1, "value1"}, {:key2, "value2"}]
   end
+
+  def on_element_updated(keys) do
+    #new key is added to the list, do something:
+    spawn(fn() -> IO.inspect keys end)
+  end
+
+  def updated?(el1, el2) do
+    #Customize function that determine if the object for one key has been
+    # updated
+    el1 != el2
+  end
 end
 
 ## Usage
-"value" = BufferRead.read(:key1)
+"value1" = BufferRead.read(:key1)
 
 ## API
 BufferRead.sync()
