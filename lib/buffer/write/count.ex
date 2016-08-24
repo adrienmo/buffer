@@ -19,6 +19,9 @@ defmodule Buffer.Write.Count do
       def incr(key), do: unquote(__MODULE__).incr(__MODULE__, key, 1)
       def incr(key, value), do: unquote(__MODULE__).incr(__MODULE__, key, value)
       def sync(), do: unquote(__MODULE__).sync(__MODULE__)
+      def set_opt(key, value) do
+        unquote(__MODULE__).set_opt(__MODULE__, key, value)
+      end
       def dump_table(), do: unquote(__MODULE__).dump_table(__MODULE__)
       def reset(), do: unquote(__MODULE__).reset(__MODULE__)
     end
@@ -35,8 +38,13 @@ defmodule Buffer.Write.Count do
     GenServer.call(name, :sync)
   end
 
+  def set_opt(name, term, value) do
+    GenServer.call(name, {:set_opt, term, value})
+  end
+
   def init(state) do
-    :ets.new(state.name, [:public, :set, :named_table, {:write_concurrency, true}])
+    ets_options = [:public, :set, :named_table, {:write_concurrency, true}]
+    :ets.new(state.name, ets_options)
     unless is_nil(state.interval) do
       Process.send_after(self(), :sync, state.interval)
     end
@@ -52,9 +60,15 @@ defmodule Buffer.Write.Count do
     {:reply, :ok, state}
   end
 
+  def handle_call({:set_opt, term, value}, _, state) do
+    {:reply, :ok, %{state | term => value}}
+  end
+
   def handle_info(:sync, state) do
-    Process.send_after(self(), :sync, state.interval)
-    write(state)
+    unless is_nil(state.interval) do
+      Process.send_after(self(), :sync, state.interval)
+      write(state)
+    end
     {:noreply, state}
   end
 
