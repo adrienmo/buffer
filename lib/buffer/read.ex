@@ -23,6 +23,7 @@ defmodule Buffer.Read do
         worker(unquote(__MODULE__), [state], id: __MODULE__)
       end
 
+      def timeout, do: unquote(if is_nil(opts[:timeout]), do: 5_000, else: opts[:timeout])
       def get(key), do: unquote(__MODULE__).get(__MODULE__, key)
       def select(match_spec), do: unquote(__MODULE__).select(__MODULE__, match_spec)
       def select(match_spec, limit), do: unquote(__MODULE__).select(__MODULE__, match_spec, limit)
@@ -40,7 +41,7 @@ defmodule Buffer.Read do
   end
 
   def sync(name) do
-    GenServer.call(name, :sync)
+    GenServer.call(name, :sync, name.timeout)
   end
 
   def init(state) do

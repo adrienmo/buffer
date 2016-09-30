@@ -7,7 +7,7 @@ defmodule Buffer.Mixfile do
     [
       app: :buffer,
       version: @version,
-      elixir: "~> 1.2",
+      elixir: "~> 1.3",
       test_coverage: [tool: ExCoveralls],
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
