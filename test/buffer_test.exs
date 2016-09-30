@@ -12,6 +12,7 @@ defmodule BufferTest do
     Buffer.Supervisor.start_child(BufferReadDefaultBehavior)
     Buffer.Supervisor.start_child(BufferReadDeleteBehavior)
     Buffer.Supervisor.start_child(BufferSync)
+    Buffer.Supervisor.start_child(BufferReadTimeout)
     :ok
   end
 
@@ -129,6 +130,11 @@ defmodule BufferTest do
     assert(result[BufferReadUpdateCustom] == [:key2])
   end
 
+  test "0105# Read, Get with timeout" do
+    Process.sleep(7_000)
+    assert(BufferReadTimeout.get(:key1) == "value1")
+  end
+
   test "0200# Sync" do
     BufferSync.add(1)
     BufferSync.add(5)
@@ -181,6 +187,19 @@ end
 defmodule BufferRead do
   use Buffer.Read
   def read do
+    [
+      {:key1, "value1"},
+      {:key2, "value2"},
+      {:key3, %{field1: 5, field2: 4}},
+      {:key4, %{field1: 4, field2: 4}}
+    ]
+  end
+end
+
+defmodule BufferReadTimeout do
+  use Buffer.Read, timeout: 8_000
+  def read do
+    Process.sleep(6_000)
     [
       {:key1, "value1"},
       {:key2, "value2"},
