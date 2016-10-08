@@ -11,7 +11,7 @@ defmodule Buffer.Mixfile do
       test_coverage: [tool: ExCoveralls],
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
-      deps: [{:excoveralls, "~> 0.5.5", only: :test}],
+      deps: [{:ex_doc, ">= 0.0.0", only: :dev},{:excoveralls, "~> 0.5.5", only: :test}],
       package: package,
       name: "buffer",
       source_url: "https://github.com/adrienmo/buffer",
