@@ -24,7 +24,10 @@ defmodule Buffer.Read do
       end
 
       def timeout, do: unquote(if is_nil(opts[:timeout]), do: 5_000, else: opts[:timeout])
-      def get(key), do: unquote(__MODULE__).get(__MODULE__, key)
+      def get(key), do: unquote(__MODULE__).get(__MODULE__, key, true)
+      def get(key, synchronise) when is_boolean(synchronise) do
+        unquote(__MODULE__).get(__MODULE__, key, synchronise)
+      end
       def select(match_spec), do: unquote(__MODULE__).select(__MODULE__, match_spec)
       def select(match_spec, limit), do: unquote(__MODULE__).select(__MODULE__, match_spec, limit)
       def sync(), do: unquote(__MODULE__).sync(__MODULE__)
@@ -50,10 +53,16 @@ defmodule Buffer.Read do
     {:ok, state}
   end
 
-  def get(name, key) do
+  def get(name, key, synchronise \\ true) do
     case :ets.lookup(name, key) do
       [{_, value}] -> value
-      _ -> nil
+      _ ->
+        if synchronise do
+          sync(name)
+          get(name, key, false)
+        else
+          nil
+        end
     end
   end
 
@@ -94,7 +103,7 @@ defmodule Buffer.Read do
 
     updated_ids = if state.update do
       Enum.reduce(elements, [], fn({id, element}, acc) ->
-        previous_element = get(state.name, id)
+        previous_element = get(state.name, id, false)
         # Check if the item has been updated using the custom compare function
         is_updated = if state.compare do
           apply(state.name, @compare_fun, [previous_element, element])

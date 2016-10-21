@@ -13,6 +13,8 @@ defmodule BufferTest do
     Buffer.Supervisor.start_child(BufferReadDeleteBehavior)
     Buffer.Supervisor.start_child(BufferSync)
     Buffer.Supervisor.start_child(BufferReadTimeout)
+    :ets.new(:read_nil, [:named_table, :public])
+    Buffer.Supervisor.start_child(BufferReadNil)
     :ok
   end
 
@@ -135,6 +137,13 @@ defmodule BufferTest do
     assert(BufferReadTimeout.get(:key1) == "value1")
   end
 
+  test "0106# Reload read if nil" do
+    assert(BufferReadNil.get(:value) == nil)
+    :ets.delete(:read_nil, "read_nil")
+    :ets.insert(:read_nil, {"read_nil", {:value, "hello"}})
+    assert(BufferReadNil.get(:value) == "hello")
+  end
+
   test "0200# Sync" do
     BufferSync.add(1)
     BufferSync.add(5)
@@ -246,5 +255,17 @@ defmodule BufferSync do
 
   def write(elements) do
     for {key, value} <- elements, do: BufferKeyListResult.add(key, value)
+  end
+end
+
+defmodule BufferReadNil do
+  use Buffer.Read
+  def read do
+    results = :ets.lookup(:read_nil, "read_nil")
+    case results do
+      [{"read_nil", value}] ->
+        value
+      _ -> []
+    end
   end
 end
