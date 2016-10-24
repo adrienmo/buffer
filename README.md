@@ -87,7 +87,7 @@ BufferCount.sync()
 ```elixir
 ## Declaration of the buffer
 defmodule BufferRead do
-  use Buffer.Read, interval: 1000, timeout: 5_000
+  use Buffer.Read, interval: 1000, timeout: 5_000, synchronize: true
   def read() do
     ## Write here your reading function
     [{:key1, "value1"}, {:key2, "value2"}]
@@ -104,6 +104,12 @@ defmodule BufferRead do
     el1 != el2
   end
 end
+
+## Options
+
+- synchronize: is used to force sync when the value is nil.
+- timeout: timeout for the read function
+- interval: auto sync interval
 
 ## Usage
 "value1" = BufferRead.read(:key1)
