@@ -24,10 +24,8 @@ defmodule Buffer.Read do
       end
 
       def timeout, do: unquote(if is_nil(opts[:timeout]), do: 5_000, else: opts[:timeout])
-      def get(key), do: unquote(__MODULE__).get(__MODULE__, key, true)
-      def get(key, synchronise) when is_boolean(synchronise) do
-        unquote(__MODULE__).get(__MODULE__, key, synchronise)
-      end
+      def synchronize, do: unquote(if is_nil(opts[:synchronize]), do: false, else: opts[:synchronize])
+      def get(key), do: unquote(__MODULE__).get(__MODULE__, key)
       def select(match_spec), do: unquote(__MODULE__).select(__MODULE__, match_spec)
       def select(match_spec, limit), do: unquote(__MODULE__).select(__MODULE__, match_spec, limit)
       def sync(), do: unquote(__MODULE__).sync(__MODULE__)
@@ -53,11 +51,15 @@ defmodule Buffer.Read do
     {:ok, state}
   end
 
-  def get(name, key, synchronise \\ true) do
+  def get(name, key) do
+    get(name, key, name.synchronize)
+  end
+
+  def get(name, key, synchronize) do
     case :ets.lookup(name, key) do
       [{_, value}] -> value
       _ ->
-        if synchronise do
+        if synchronize do
           sync(name)
           get(name, key, false)
         else

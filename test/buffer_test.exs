@@ -259,7 +259,7 @@ defmodule BufferSync do
 end
 
 defmodule BufferReadNil do
-  use Buffer.Read
+  use Buffer.Read, synchronize: true
   def read do
     results = :ets.lookup(:read_nil, "read_nil")
     case results do
