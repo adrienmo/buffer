@@ -1,6 +1,5 @@
 defmodule Buffer.Write.Count do
   use GenServer
-  use Behaviour
 
   defmacro __using__(opts \\ []) do
     quote do
@@ -28,7 +27,7 @@ defmodule Buffer.Write.Count do
   end
 
   @doc "Write function"
-  defcallback write([{key :: any(), element :: any()}]) :: any()
+  @callback write([{key :: any(), element :: any()}]) :: any()
 
   def start_link(state) do
     GenServer.start_link(__MODULE__, state, [name: state.name])

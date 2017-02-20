@@ -7,14 +7,15 @@ defmodule Buffer.Mixfile do
     [
       app: :buffer,
       version: @version,
-      elixir: "~> 1.3",
+      elixir: "~> 1.4",
       test_coverage: [tool: ExCoveralls],
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       deps: [{:ex_doc, ">= 0.0.0", only: :dev},{:excoveralls, "~> 0.5.5", only: :test}],
-      package: package,
+      package: package(),
       name: "buffer",
       source_url: "https://github.com/adrienmo/buffer",
+      elixirc_options: [warnings_as_errors: true],
       description: """
       Provide read and write buffers for Elixir
       """
