@@ -1,6 +1,5 @@
 defmodule Buffer.Read do
   use GenServer
-  use Behaviour
 
   @update_fun :on_element_updated
   @compare_fun :updated?
@@ -35,7 +34,7 @@ defmodule Buffer.Read do
   end
 
   @doc "Read function"
-  defcallback read() :: [{key :: any(), element :: any()}]
+  @callback read() :: [{key :: any(), element :: any()}]
 
   def start_link(state) do
     GenServer.start_link(__MODULE__, state, [name: state.name])

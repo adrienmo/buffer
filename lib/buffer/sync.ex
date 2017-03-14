@@ -1,6 +1,5 @@
 defmodule Buffer.Sync do
   use GenServer
-  use Behaviour
 
   defmacro __using__(opts \\ []) do
     quote do
@@ -27,10 +26,10 @@ defmodule Buffer.Sync do
   end
 
   @doc "Read function"
-  defcallback read([any()]) :: [any()]
+  @callback read([any()]) :: [any()]
 
   @doc "Write function"
-  defcallback write([any()]) :: any()
+  @callback write([any()]) :: any()
 
   def start_link(state) do
     GenServer.start_link(__MODULE__, state, [name: state.name])
