@@ -1,13 +1,13 @@
 defmodule Buffer.Mixfile do
   use Mix.Project
 
-  @version File.read!("VERSION") |> String.strip
+  @version File.read!("VERSION") |> String.trim
 
   def project do
     [
       app: :buffer,
       version: @version,
-      elixir: "~> 1.4",
+      elixir: "~> 1.5",
       test_coverage: [tool: ExCoveralls],
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
