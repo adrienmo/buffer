@@ -57,7 +57,6 @@ defmodule Buffer.Write.Count do
 
   def set(name, key, value) do
     :ets.insert(name, {key, value})
-    |> IO.inspect
   end
 
   def handle_call(:sync, _, state) do
