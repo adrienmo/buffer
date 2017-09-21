@@ -45,10 +45,10 @@ defmodule BufferTest do
     result = BufferKeyListResult.dump_table()
     assert([] == result)
 
-    :timer.sleep(1000)
+    :timer.sleep(2_000)
 
     result = BufferKeyListResult.dump_table()
-    assert([{_, [{1, [1, 2, 3, 4]}]}] = result)
+    assert({BufferKeyListInterval, [{1, [1, 2, 3, 4]}]} in result)
   end
 
   test "0010# Read, Count, Sync" do
@@ -61,7 +61,7 @@ defmodule BufferTest do
     assert([key2: 5050, key1: 6] = BufferCount.dump_table())
     BufferCount.sync()
     result = BufferKeyListResult.dump_table()
-    assert([{_, [key2: 5050, key1: 6]}] = result)
+    assert({BufferCount, [key2: 5050, key1: 6]} in result)
     BufferCount.reset()
   end
 
