@@ -1,5 +1,5 @@
 # buffer
-[![Travis](https://img.shields.io/travis/adrienmo/buffer.svg?branch=master&style=flat-square)](https://travis-ci.org/adrienmo/buffer)
+[![Travis](https://travis-ci.org/tongdao/buffer.svg?branch=master)](https://travis-ci.org/tongdao/buffer)
 [![Coveralls](https://img.shields.io/coveralls/adrienmo/buffer.svg?branch=master&style=flat-square)](https://coveralls.io/github/adrienmo/buffer)
 [![Hex.pm](https://img.shields.io/hexpm/v/buffer.svg?style=flat-square)](https://hex.pm/packages/buffer)
 [![Ebert](https://ebertapp.io/github/adrienmo/buffer.svg)](https://ebertapp.io/github/adrienmo/buffer)
