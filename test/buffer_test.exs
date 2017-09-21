@@ -56,9 +56,12 @@ defmodule BufferTest do
     for x <- 1..100, do: BufferCount.incr(:key2, x)
 
     assert([key2: 5050, key1: 100] == BufferCount.dump_table())
+    BufferCount.set(:key1, 5)
+    BufferCount.incr(:key1)
+    assert([key2: 5050, key1: 6] = BufferCount.dump_table())
     BufferCount.sync()
     result = BufferKeyListResult.dump_table()
-    assert([{_, [key2: 5050, key1: 100]}] = result)
+    assert([{_, [key2: 5050, key1: 6]}] = result)
     BufferCount.reset()
   end
 
