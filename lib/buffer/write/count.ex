@@ -17,6 +17,7 @@ defmodule Buffer.Write.Count do
 
       def incr(key), do: unquote(__MODULE__).incr(__MODULE__, key, 1)
       def incr(key, value), do: unquote(__MODULE__).incr(__MODULE__, key, value)
+      def set(key, value), do: unquote(__MODULE__).set(__MODULE__, key, value)
       def sync(), do: unquote(__MODULE__).sync(__MODULE__)
       def set_opt(key, value) do
         unquote(__MODULE__).set_opt(__MODULE__, key, value)
@@ -52,6 +53,10 @@ defmodule Buffer.Write.Count do
 
   def incr(name, key, value) do
     :ets.update_counter(name, key, value, {key, 0})
+  end
+
+  def set(name, key, value) do
+    :ets.insert(name, {key, value})
   end
 
   def handle_call(:sync, _, state) do
