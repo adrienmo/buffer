@@ -15,6 +15,7 @@ defmodule Buffer.Sync do
           write: &write/1,
           elements_to_sync: []
         }
+
         worker(unquote(__MODULE__), [state], id: __MODULE__)
       end
 
@@ -32,7 +33,7 @@ defmodule Buffer.Sync do
   @callback write([any()]) :: any()
 
   def start_link(state) do
-    GenServer.start_link(__MODULE__, state, [name: state.name])
+    GenServer.start_link(__MODULE__, state, name: state.name)
   end
 
   def add(name, element), do: GenServer.call(name, {:add, element})
@@ -54,6 +55,7 @@ defmodule Buffer.Sync do
     unless is_nil(state.interval) do
       Process.send_after(self(), :sync, state.interval)
     end
+
     _sync(state)
     {:noreply, state}
   end

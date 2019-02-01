@@ -1,0 +1,11 @@
+stages:
+  - test
+
+test:
+  stage: test
+  image: bitwalker/alpine-elixir:1.8.0
+  script:
+    - mix deps.get
+    - mix format --check-formatted
+    - MIX_ENV=test mix do compile --warnings-as-errors, coveralls.json
+    - bash <(curl -s https://codecov.io/bash)

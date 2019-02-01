@@ -1,7 +1,7 @@
 defmodule Buffer.Mixfile do
   use Mix.Project
 
-  @version File.read!("VERSION") |> String.trim
+  @version File.read!("VERSION") |> String.trim()
 
   def project do
     [
@@ -9,9 +9,9 @@ defmodule Buffer.Mixfile do
       version: @version,
       elixir: "~> 1.5",
       test_coverage: [tool: ExCoveralls],
-      build_embedded: Mix.env == :prod,
-      start_permanent: Mix.env == :prod,
-      deps: [{:ex_doc, ">= 0.0.0", only: :dev}, {:excoveralls, "~> 0.7.3", only: :test}],
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
+      deps: [{:ex_doc, ">= 0.0.0", only: :dev}, {:excoveralls, "~> 0.10.4", only: :test}],
       package: package(),
       name: "buffer",
       source_url: "https://github.com/adrienmo/buffer",
