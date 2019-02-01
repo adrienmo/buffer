@@ -1,6 +1,6 @@
 defmodule Buffer.Read do
   use GenServer
-
+  require Logger
   @update_fun :on_element_updated
   @compare_fun :updated?
 
@@ -101,6 +101,10 @@ defmodule Buffer.Read do
   end
 
   def unused_fun do
+    Logger.info("this should impact coverage")
+    Logger.info("this should impact coverage")
+    Logger.info("this should impact coverage")
+    Logger.info("this should impact coverage")
     :ok
   end
 
