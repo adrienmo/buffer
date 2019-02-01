@@ -100,6 +100,10 @@ defmodule Buffer.Read do
     {:noreply, state}
   end
 
+  def unused_fun do
+    :ok
+  end
+
   defp read(state) do
     elements = state.read.()
 
